@@ -20,15 +20,23 @@ function updateInputs(){
 function getNominations() {
     updateInputs();
 
+    if((nomineeValue !== "" || infoValue !== "") && nomInfoValue !== ""){
+        return(alert("You cant enter value to Nominee/Info while entering value one of them already."))
+    }
+    if((nomineeValue === "" || infoValue === "") && nomInfoValue !== ""){
+        infoValue = nomInfoValue;
+        nomineeValue = nomInfoValue;
+    }
+
     const url = `http://localhost:8080/getNominations?
     Year=${encodeURIComponent(yearValue)}
     &Category=${encodeURIComponent(categoryValue)}
     &Nominee=${encodeURIComponent(nomineeValue)}
     &Info=${encodeURIComponent(infoValue)}
     &Won=${encodeURIComponent(wonValue)}`;
-
     fetch(url)
         .then((response)=>{
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -53,18 +61,30 @@ function getNominations() {
         })
 }
 
+// Fix this part !!
 function getNominees() {
     updateInputs();
-    const url = `/getNominations?&nominee=${encodeURIComponent(nomineeValue)}
-    &times=${encodeURIComponent(timesValue)}`;
+    const url = `http://localhost:8080/getNominees?&Nominee=${encodeURIComponent(nomineeValue)}
+    &Times=${encodeURIComponent(timesValue)}`;
 
-    fetch(url).then((response)=> response.json())
+    fetch(url)
+        .then((response)=> response.json())
         .then((data) => {
-            let output = "<ul>";
-            for ( const nominee of data )
-                output = output + "<li>" + data.winner + " beat "
-                    + data.loser + "</li>";
-            document.getElementById("output").innerHTML = output + "</ul>";
+            let output = "<table>";
+
+            output +="<tr>";
+            for (const header of ["Nominee", "Times"]){
+                output += `<th>${header}</th>`
+            }
+            for (const nominee of data) {
+                output += "<tr>";
+                for (const key of ["Nominee", "Times"]) {
+                    output += `<td>${nominee[key]}</td>`;
+                }
+                output += "</tr>";
+            }
+            output += "</table>";
+            document.getElementById("output").innerHTML = output;
         })
 }
 

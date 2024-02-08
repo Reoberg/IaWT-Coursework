@@ -72,9 +72,9 @@ async function readJSONFile() {
 }
 function filterNominations(query, nominationsData) {
     // Implement filtering logic based on HTML inputs (query parameters)
-    console.log(query)
-    const {Year, Category, Nominee, Info, Won } = query;
 
+    const {Year, Category, Nominee, Info, Won } = query;
+    console.log(query)
     // Implement your specific filtering logic based on input values
        let filteredData = nominationsData;
     //console.log(Year)
@@ -105,7 +105,7 @@ function filterNominations(query, nominationsData) {
         });
         console.log("Info is defined")
     }
-    if (Won) {
+    if (Won && (Won === "yes" || Won === "no")){
         filteredData = filteredData.filter(nomination => nomination.Won.toLowerCase().includes(Won.toLowerCase().trim()));
         console.log("Won is defined")
     }
@@ -119,7 +119,9 @@ function filterNominations(query, nominationsData) {
 function filterNominees(query,nomineeData) {
     const {Nominee, Times} = query
     const wonCounts = {};
+    const nomineeSet = new Set();
 
+    console.log(Times)
     nomineeData.forEach(nomination => {
         const nomineeName = nomination.Nominee;
 
@@ -132,29 +134,37 @@ function filterNominees(query,nomineeData) {
         if (nomination.Won === 'yes') {
             wonCounts[nomineeName]++;
         }
+
+        nomineeSet.add(nomineeName);
     });
-    const mappedData = nomineeData.map(nomination => ({
-        Nominee: nomination.Nominee,
-        Times: wonCounts[nomination.Nominee]
+    const mappedData = Array.from(nomineeSet).map(nomination => ({
+        Nominee: nomination,
+        Times: wonCounts[nomination]
     }));
 
     let filteredData = mappedData;
-    console.log(mappedData)
+
 
     if (!Times || Times === "") {
-        // filteredData = filteredData.filter(nomination =>{
-        //     if (nomination.Nominee !== undefined || Nominee !== undefined){
-        //         nomination.Nominee.toLowerCase().includes(Nominee.toLowerCase().trim())
-        //     }
-        // });
-        filteredData = filteredData.filter(nomination => wonCounts[nomination.Nominee] !== undefined || wonCounts[nomination.Nominee] !== "");
-        filteredData.sort((a, b) => wonCounts[b.Nominee] - wonCounts[a.Nominee]);
+        filteredData = filteredData.filter(nomination => {
+            if (Nominee && Nominee !== "") {
+                return nomination.Nominee.toLowerCase().includes(Nominee.toLowerCase().trim());
+            }
+            return true;
+        });
+        filteredData.sort((a, b) => b.Times - a.Times);
+        //filteredData = filteredData.filter(nomination => wonCounts[nomination.Nominee] !== undefined || wonCounts[nomination.Nominee] !== "");
+        //filteredData.sort((a, b) => wonCounts[b.Nominee] - wonCounts[a.Nominee]);
     }
     else {
-        filteredData = filteredData.filter(nomination => nomination.Nominee.toLowerCase().includes(Nominee.toLowerCase().trim()));
-        filteredData = filteredData.filter(nomination => wonCounts[nomination.Nominee] === Times);
+        filteredData = filteredData.filter(nomination =>
+            nomination.Nominee.toLowerCase().includes(Nominee.toLowerCase().trim()) &&
+            nomination.Times === parseInt(Times, 10)
+        );
+        // filteredData = filteredData.filter(nomination => nomination.Nominee.toLowerCase().includes(Nominee.toLowerCase().trim()));
+        // filteredData = filteredData.filter(nomination => wonCounts[nomination.Nominee] === Times);
     }
-
+    console.log(filteredData)
     return filteredData;
 
 }
