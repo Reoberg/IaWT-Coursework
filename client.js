@@ -27,13 +27,10 @@ function getNominations() {
         infoValue = nomInfoValue;
         nomineeValue = nomInfoValue;
     }
+//    &Year=${encodeURIComponent(yearValue)}
+    const url = `http://localhost:8080/getNominations?Year=${encodeURIComponent(yearValue)}&Category=${encodeURIComponent(categoryValue)}&Nominee=${encodeURIComponent(nomineeValue)}&Info=${encodeURIComponent(infoValue)}&Won=${encodeURIComponent(wonValue)}`;
 
-    const url = `http://localhost:8080/getNominations?
-    Year=${encodeURIComponent(yearValue)}
-    &Category=${encodeURIComponent(categoryValue)}
-    &Nominee=${encodeURIComponent(nomineeValue)}
-    &Info=${encodeURIComponent(infoValue)}
-    &Won=${encodeURIComponent(wonValue)}`;
+    console.log("Year in Client:: " + yearValue)
     fetch(url)
         .then((response)=>{
 

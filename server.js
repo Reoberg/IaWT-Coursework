@@ -10,7 +10,7 @@ const app = express();
 const PORT = 8080;
 
 app.use(cors({
-    origin: 'http://localhost:63343'
+    origin: 'http://localhost:63342'
 }));
 // fastify.register(fastifyCors, {
 //     origin: 'http://localhost:63343'
@@ -72,12 +72,12 @@ async function readJSONFile() {
 }
 function filterNominations(query, nominationsData) {
     // Implement filtering logic based on HTML inputs (query parameters)
-
     const {Year, Category, Nominee, Info, Won } = query;
+    console.log(Year)
     console.log(query)
     // Implement your specific filtering logic based on input values
        let filteredData = nominationsData;
-    //console.log(Year)
+     console.log("Year in Server:: " + Year)
     // Year query is coming undefined solve it
     if (Year) {
         filteredData = filteredData.filter(nomination => nomination.Year.toLowerCase().includes(Year.toLowerCase().trim()));
@@ -121,22 +121,22 @@ function filterNominees(query,nomineeData) {
     const wonCounts = {};
     const nomineeSet = new Set();
 
-    console.log(Times)
-    nomineeData.forEach(nomination => {
-        const nomineeName = nomination.Nominee;
+    // Filtering Actors,Actress and Supports
+    const personFilteredData = nomineeData.filter(nomination => nomination.Category.includes("Actor") || nomination.Category.includes("Actress") )
 
-        // Initialize count if the nominee is encountered for the first time
+    personFilteredData.forEach(nomination => {
+        const nomineeName = nomination.Nominee.trim();
+
+        //Initialize count if the nominee is encountered for the first time
         if (!wonCounts[nomineeName]) {
             wonCounts[nomineeName] = 0;
         }
 
-        // If the movie won, increment the won count for the nominee
-        if (nomination.Won === 'yes') {
-            wonCounts[nomineeName]++;
-        }
-
+        //Increment the won count for the nominee
+        wonCounts[nomineeName]++;
         nomineeSet.add(nomineeName);
     });
+
     const mappedData = Array.from(nomineeSet).map(nomination => ({
         Nominee: nomination,
         Times: wonCounts[nomination]
@@ -152,9 +152,9 @@ function filterNominees(query,nomineeData) {
             }
             return true;
         });
-        filteredData.sort((a, b) => b.Times - a.Times);
+        //filteredData.sort((a, b) => b.Times - a.Times);
         //filteredData = filteredData.filter(nomination => wonCounts[nomination.Nominee] !== undefined || wonCounts[nomination.Nominee] !== "");
-        //filteredData.sort((a, b) => wonCounts[b.Nominee] - wonCounts[a.Nominee]);
+        filteredData.sort((a, b) => wonCounts[b.Nominee] - wonCounts[a.Nominee]);
     }
     else {
         filteredData = filteredData.filter(nomination =>
